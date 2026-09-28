@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Base64 MIDI Downloader</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 16px;
+      line-height: 1.5;
+    }
+    textarea {
+      width: 100%;
+      height: 140px;
+      font-family: monospace;
+      font-size: 13px;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
+    }
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    button {
+      padding: 8px 18px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Base64 MIDI Downloader</h2>
+  <p>Paste either the raw Base64 string or the full JavaScript snippet below:</p>
+
+  <textarea id="input" placeholder="Paste your snippet or base64 string here..."></textarea>
+  
+  <div class="controls">
+    <input type="text" id="filename" value="shepherds_lament.mid" placeholder="Filename">
+    <button onclick="downloadMidi()">Download MIDI</button>
+  </div>
+
+  <script>
+    // Pre-populate with your code snippet
+    document.getElementById("input").value = `const b64 = "TVRoZAAAAAYAAAAAAQDwTFRyawAAAQCAQD/AwNBQUEAgB8B8AgAAMDAZAD/UQAAqGYAAMCAGAAPwEBkAP9RAACoZgAAwIBkAP9RAACoZgAAAMB/AADAwmYAAMDAYAAAwH8AAMDAZAAAAMCgZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMCQZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAMCEZAAAwH8AAMDAZAAAAMDgZAAAwH8AAMDAZAAAAP8vAA==";
+const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+const blob = new Blob([bytes], { type: "audio/midi" });
+const a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "shepherds_lament.mid";
+a.click();`;
+
+    function downloadMidi() {
+      const text = document.getElementById("input").value.trim();
+      let filename = document.getElementById("filename").value.trim() || "audio.mid";
+
+      // Extract filename if present in code snippet
+      const nameMatch = text.match(/download\s*=\s*["']([^"']+)["']/);
+      if (nameMatch && nameMatch[1]) {
+        filename = nameMatch[1];
+        document.getElementById("filename").value = filename;
+      }
+
+      // Extract base64 payload from code snippet or take raw string
+      let b64 = text;
+      const b64Match = text.match(/b64\s*=\s*["']([^"']+)["']/);
+      if (b64Match && b64Match[1]) {
+        b64 = b64Match[1];
+      }
+
+      // Clean up whitespace/newlines
+      b64 = b64.replace(/\s+/g, '');
+
+      try {
+        const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        const blob = new Blob([bytes], { type: "audio/midi" });
+        const a = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up memory
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      } catch (err) {
+        alert("Invalid Base64 string. Please verify the input.");
+      }
+    }
+  </script>
+</body>
+</html>
